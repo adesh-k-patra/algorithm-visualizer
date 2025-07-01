@@ -80,32 +80,37 @@ export function VariableSelector({
   }
 
   useEffect(() => {
-    const ast = parser.parse(code, {
-      sourceType: "module",
-      plugins: ["jsx", "typescript"],
-    })
-    const variables: string[] = []
-    traverse(ast, {
-      VariableDeclarator(path: NodePath<VariableDeclarator>) {
-        _extractFromPattern(path.node.id as Pattern, variables)
-      },
-      FunctionDeclaration(path: NodePath<FunctionDeclaration>) {
-        path.node.params.forEach((param) =>
-          _extractFromPattern(param as Pattern, variables)
-        )
-      },
-      FunctionExpression(path: NodePath<FunctionExpression>) {
-        path.node.params.forEach((param) =>
-          _extractFromPattern(param as Pattern, variables)
-        )
-      },
-      ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>) {
-        path.node.params.forEach((param) =>
-          _extractFromPattern(param as Pattern, variables)
-        )
-      },
-    })
-    setVariables(variables)
+    try {
+      const ast = parser.parse(code, {
+        sourceType: "module",
+        plugins: ["jsx", "typescript"],
+      })
+      const variables: string[] = []
+      traverse(ast, {
+        VariableDeclarator(path: NodePath<VariableDeclarator>) {
+          _extractFromPattern(path.node.id as Pattern, variables)
+        },
+        FunctionDeclaration(path: NodePath<FunctionDeclaration>) {
+          path.node.params.forEach((param) =>
+            _extractFromPattern(param as Pattern, variables)
+          )
+        },
+        FunctionExpression(path: NodePath<FunctionExpression>) {
+          path.node.params.forEach((param) =>
+            _extractFromPattern(param as Pattern, variables)
+          )
+        },
+        ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>) {
+          path.node.params.forEach((param) =>
+            _extractFromPattern(param as Pattern, variables)
+          )
+        },
+      })
+      setVariables(variables)
+    } catch (err) {
+      console.log(err)
+      setVariables([])
+    }
   }, [code])
 
   return (

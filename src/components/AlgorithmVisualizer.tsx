@@ -6,47 +6,37 @@ import { ControlPanel } from "./ControlPanel"
 import { ConsoleOutput } from "./ConsoleOutput"
 import { VariableSelector } from "./VariableSelector"
 import { AlgorithmState } from "../types/algorithm"
+import { RenderTrace } from "./RenderTrace"
 
-const initialCode = `// Tree Traversal Visualization
-const tree = {
-  value: 5,
-  left: {
-    value: 3,
-    left: { value: 1, left: null, right: null },
-    right: { value: 4, left: null, right: null }
-  },
-  right: {
-    value: 8,
-    left: { value: 6, left: null, right: null },
-    right: { value: 10, left: null, right: null }
+const initialCode = `var person = {
+  name: "Alice",
+  age: 25,
+  address: {
+    city: {
+      road: {
+        house: {
+          floor: 2
+        }
+      }
+    },
+    zip: "10001"
   }
 };
 
-const myArray = [64, 34, 25, 12, 22, 11, 90];
-const myStack = [1, 2, 3, 4, 5];
+// Step 1
+person.age = 26;
 
-function inorderTraversal(root) {
-  if (!root) return;
-  
-  inorderTraversal(root.left);
-  console.log("Visiting:", root.value);
-  inorderTraversal(root.right);
-}
 
-function bubbleSort(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = 0; j < arr.length - i - 1; j++) {
-      if (arr[j] > arr[j + 1]) {
-        let temp = arr[j];
-        arr[j] = arr[j + 1];
-        arr[j + 1] = temp;
-      }
-    }
-  }
-  return arr;
-}
+// Step 3
+person.email = "alice@example.com";
 
-inorderTraversal(tree);`
+// Step 4
+delete person.address.zip;
+
+// Step 5
+person.hobbies = ["reading", "traveling"];
+
+`
 
 export function AlgorithmVisualizer() {
   const [code, setCode] = useState(initialCode)
@@ -114,12 +104,18 @@ export function AlgorithmVisualizer() {
       <div className="flex-1 flex flex-col">
         <PanelGroup direction="horizontal">
           {/* Left Side: Visualization + Console (vertical layout) */}
-          <Panel>
+          <Panel defaultSize={50} minSize={30}>
             <PanelGroup direction="vertical">
               {/* Top Panel - Visualization Panel  */}
               <Panel defaultSize={70} minSize={30}>
-                <div>
-                  <VisualizationPanel algorithmState={algorithmState} />
+                <div className="flex h-full">
+                  <div className="flex-1 min-w-24 bg-slate-600">
+                    <RenderTrace
+                      algorithmState={algorithmState}
+                      selectedVariable={selectedVariable}
+                    />
+                  </div>
+                  <div className="w-[200px] bg-orange-500">hello</div>
                 </div>
               </Panel>
               <PanelResizeHandle
