@@ -1,112 +1,159 @@
-import React from 'react';
-import { Play, Pause, SkipForward, RotateCcw, Settings, Square } from 'lucide-react';
-import { AlgorithmState } from '../types/algorithm';
-import { parseAndExecuteCode } from '../utils/codeParser';
+import React from "react"
+import {
+  Play,
+  Pause,
+  SkipForward,
+  RotateCcw,
+  Settings,
+  Square,
+  SkipBack,
+} from "lucide-react"
+import { AlgorithmState } from "../types/algorithm"
+import { parseAndExecuteCode } from "../utils/codeParser"
 
 interface ControlPanelProps {
-  algorithmState: AlgorithmState;
-  onStateChange: (state: AlgorithmState) => void;
-  code: string;
-  selectedVariable: string;
-  selectedDataStructure: string;
+  algorithmState: AlgorithmState
+  onStateChange: React.Dispatch<React.SetStateAction<AlgorithmState>>
+  code: string
+  selectedVariable: string
+  selectedDataStructure: string
 }
 
-export function ControlPanel({ 
-  algorithmState, 
-  onStateChange, 
-  code, 
-  selectedVariable, 
-  selectedDataStructure 
+export function ControlPanel({
+  algorithmState,
+  onStateChange,
+  code,
+  selectedVariable,
+  selectedDataStructure,
 }: ControlPanelProps) {
-  
   const handleRun = async () => {
-    if (!selectedVariable || !selectedDataStructure) {
+    if (!selectedVariable) {
       onStateChange({
         ...algorithmState,
-        logs: [{ 
-          message: 'Please select a variable and data structure type first!', 
-          type: 'warning', 
-          timestamp: Date.now() 
-        }]
-      });
-      return;
+        logs: [
+          {
+            message: "Please select a variable first",
+            type: "warning",
+            timestamp: Date.now(),
+          },
+        ],
+      })
+      return
     }
 
     try {
-      const result = await parseAndExecuteCode(code, selectedVariable, selectedDataStructure);
+      const result = await parseAndExecuteCode({
+        code,
+        targetVar: selectedVariable,
+      })
+
       onStateChange({
         ...algorithmState,
         isRunning: true,
         isPaused: false,
-        dataStructure: result.dataStructure,
-        logs: result.logs,
-        totalSteps: result.steps.length,
+        logs: [],
+        totalSteps: result.length,
         currentStep: 0,
-        executionSteps: result.steps
-      });
+        executionSteps: result,
+      })
 
       // Start automatic step execution
-      startAutoExecution(result.steps.length);
+      startAutoExecution(result.length)
     } catch (error) {
-      console.error('Error parsing code:', error);
+      console.error("Error parsing code:", error)
       onStateChange({
         ...algorithmState,
-        logs: [{ message: `Error: ${error}`, type: 'error', timestamp: Date.now() }]
-      });
+        logs: [
+          { message: `Error: ${error}`, type: "error", timestamp: Date.now() },
+        ],
+      })
     }
-  };
+  }
 
+  // const startAutoExecution = (totalSteps: number) => {
+  //   let currentStep = 0
+  //   const interval = setInterval(() => {
+  //     if (currentStep >= totalSteps - 1) {
+  //       clearInterval(interval)
+  //       onStateChange((prev) => ({
+  //         ...prev,
+  //         isRunning: false,
+  //         isPaused: false,
+  //       }))
+  //       return
+  //     }
+
+  //     onStateChange((prev) => {
+  //       if (prev.isPaused) {
+  //         clearInterval(interval)
+  //         return prev
+  //       }
+  //       return {
+  //         ...prev,
+  //         currentStep: currentStep + 1,
+  //       }
+  //     })
+  //     currentStep++
+  //   }, algorithmState.executionSpeed)
+  // }
   const startAutoExecution = (totalSteps: number) => {
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      if (currentStep >= totalSteps - 1) {
-        clearInterval(interval);
-        onStateChange(prev => ({
-          ...prev,
-          isRunning: false,
-          isPaused: false
-        }));
-        return;
-      }
-
-      onStateChange(prev => {
+    const intervalId = setInterval(() => {
+      onStateChange((prev) => {
         if (prev.isPaused) {
-          clearInterval(interval);
-          return prev;
+          clearInterval(intervalId)
+          return prev
         }
+
+        if (prev.currentStep >= totalSteps - 1) {
+          clearInterval(intervalId)
+          return {
+            ...prev,
+            isRunning: false,
+            isPaused: false,
+          }
+        }
+
         return {
           ...prev,
-          currentStep: currentStep + 1
-        };
-      });
-      currentStep++;
-    }, algorithmState.executionSpeed);
-  };
+          currentStep: prev.currentStep + 1,
+        }
+      })
+    }, algorithmState.executionSpeed)
+  }
 
   const handlePause = () => {
     onStateChange({
       ...algorithmState,
-      isPaused: !algorithmState.isPaused
-    });
-  };
+      isPaused: !algorithmState.isPaused,
+    })
+  }
 
-  const handleStep = () => {
+  const handleStepUp = () => {
     if (algorithmState.currentStep < algorithmState.totalSteps - 1) {
       onStateChange({
         ...algorithmState,
-        currentStep: algorithmState.currentStep + 1
-      });
+        currentStep: algorithmState.currentStep + 1,
+      })
     }
-  };
+  }
+
+  const handleStepDown = () => {
+    if (algorithmState.currentStep > 0) {
+      onStateChange({
+        ...algorithmState,
+        currentStep: algorithmState.currentStep - 1,
+      })
+    }
+  }
 
   const handleStop = () => {
     onStateChange({
       ...algorithmState,
       isRunning: false,
       isPaused: false,
-      currentStep: 0
-    });
-  };
+      currentStep: 0,
+    })
+  }
 
   const handleReset = () => {
     onStateChange({
@@ -115,16 +162,16 @@ export function ControlPanel({
       isPaused: false,
       currentStep: 0,
       logs: [],
-      highlightedNodes: []
-    });
-  };
+      highlightedNodes: [],
+    })
+  }
 
   const handleSpeedChange = (speed: number) => {
     onStateChange({
       ...algorithmState,
-      executionSpeed: speed
-    });
-  };
+      executionSpeed: speed,
+    })
+  }
 
   return (
     <div className="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
@@ -137,24 +184,31 @@ export function ControlPanel({
           <Play size={16} />
           Run
         </button>
-        
+
         {algorithmState.isRunning && (
           <button
             onClick={handlePause}
             className="flex items-center gap-2 px-3 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
           >
             {algorithmState.isPaused ? <Play size={16} /> : <Pause size={16} />}
-            {algorithmState.isPaused ? 'Resume' : 'Pause'}
+            {algorithmState.isPaused ? "Resume" : "Pause"}
           </button>
         )}
-        
+
         <button
-          onClick={handleStep}
+          onClick={handleStepDown}
+          disabled={!algorithmState.isRunning || !algorithmState.isPaused}
+          className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 rounded-lg transition-colors"
+        >
+          <SkipBack size={16} />
+        </button>
+
+        <button
+          onClick={handleStepUp}
           disabled={!algorithmState.isRunning || !algorithmState.isPaused}
           className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 rounded-lg transition-colors"
         >
           <SkipForward size={16} />
-          Step
         </button>
 
         {algorithmState.isRunning && (
@@ -166,7 +220,7 @@ export function ControlPanel({
             Stop
           </button>
         )}
-        
+
         <button
           onClick={handleReset}
           className="flex items-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors"
@@ -192,13 +246,14 @@ export function ControlPanel({
         </div>
 
         <span className="text-sm text-gray-300">
-          Step: {algorithmState.currentStep + 1} / {algorithmState.totalSteps || 1}
+          Step: {algorithmState.currentStep + 1} /{" "}
+          {algorithmState.totalSteps || 1}
         </span>
-        
+
         <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
           <Settings size={16} />
         </button>
       </div>
     </div>
-  );
+  )
 }
