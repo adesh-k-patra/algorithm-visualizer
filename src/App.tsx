@@ -34,7 +34,6 @@ function App() {
   return (
     <div className="w-full h-screen">
       <AlgorithmVisualizer />
-      <RenderTrace code={code} selectedVariable="person" interval={3000} />
     </div>
   )
   // return (

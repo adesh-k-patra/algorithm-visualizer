@@ -23,6 +23,7 @@ export interface DataStructure {
 export interface ExecutionStep {
   targetVars: any
   nonTargetVars: any
+  lineNumber: number | null
 }
 
 export interface AlgorithmState {

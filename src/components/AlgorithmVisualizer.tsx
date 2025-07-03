@@ -145,7 +145,12 @@ export function AlgorithmVisualizer() {
 
           {/* Right Panel - Code Editor */}
           <Panel defaultSize={50} minSize={30}>
-            <CodeEditor code={code} onChange={setCode} language="javascript" />
+            <CodeEditor
+              code={code}
+              onChange={setCode}
+              language="javascript"
+              algorithmState={algorithmState}
+            />
           </Panel>
         </PanelGroup>
       </div>
