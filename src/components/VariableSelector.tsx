@@ -115,7 +115,7 @@ export function VariableSelector({
       onVariablesSet([])
     }
   }, [code])
-  console.log(variables)
+
   return (
     <div className="h-16 bg-gray-800 border-b border-gray-700 flex items-center px-4 gap-6">
       <div className="flex items-center gap-2">

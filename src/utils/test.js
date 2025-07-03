@@ -346,5 +346,5 @@ const tree = {
 }
 
 const normalizedTree = _normalizeToTree(tree, "user", 300, 100)
-console.log(normalizedTree)
+
 // You can now render this `normalizedTree` using your tree/graph visualizer

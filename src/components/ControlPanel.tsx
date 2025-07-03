@@ -51,7 +51,6 @@ export function ControlPanel({
           (variable) => variable !== selectedVariable
         ),
       })
-      console.log("inside handle run ")
       console.log(result)
       onStateChange({
         ...algorithmState,
