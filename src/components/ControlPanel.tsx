@@ -15,6 +15,7 @@ interface ControlPanelProps {
   algorithmState: AlgorithmState
   onStateChange: React.Dispatch<React.SetStateAction<AlgorithmState>>
   code: string
+  variables: string[]
   selectedVariable: string
   selectedDataStructure: string
 }
@@ -23,6 +24,7 @@ export function ControlPanel({
   algorithmState,
   onStateChange,
   code,
+  variables,
   selectedVariable,
   selectedDataStructure,
 }: ControlPanelProps) {
@@ -45,8 +47,12 @@ export function ControlPanel({
       const result = await parseAndExecuteCode({
         code,
         targetVar: selectedVariable,
+        nonTargetVars: variables.filter(
+          (variable) => variable !== selectedVariable
+        ),
       })
-
+      console.log("inside handle run ")
+      console.log(result)
       onStateChange({
         ...algorithmState,
         isRunning: true,

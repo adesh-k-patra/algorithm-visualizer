@@ -3,18 +3,19 @@ import {
   DataStructure,
   LogEntry,
   ExecutionStep,
-  TraceEntry,
 } from "../types/algorithm"
 import * as Babel from "@babel/standalone"
 
 export async function parseAndExecuteCode({
   code,
   targetVar,
+  nonTargetVars,
 }: {
   code: string
   targetVar: string
-}): Promise<TraceEntry[]> {
-  const traceArray: TraceEntry[] = []
+  nonTargetVars: string[]
+}): Promise<ExecutionStep[]> {
+  const traceArray: ExecutionStep[] = []
 
   // js-interpreter is only compatible with ES5 and below
   const convertedCode = Babel.transform(code, {
@@ -32,7 +33,8 @@ export async function parseAndExecuteCode({
 
   return new Promise((resolve) => {
     while (interpreter.step()) {
-      const unwrapped = _getVariableValue(interpreter, targetVar)
+      const result = _getVariableValue(interpreter, targetVar, nonTargetVars)
+      const unwrapped = result.targetVars[targetVar]
 
       if (unwrapped != null && !_deepEqual(unwrapped, lastValue)) {
         lastValue = unwrapped
@@ -40,7 +42,7 @@ export async function parseAndExecuteCode({
         const currentNode =
           interpreter.stateStack?.[interpreter.stateStack.length - 1]?.node
 
-        traceArray.push(unwrapped)
+        traceArray.push(result)
       }
     }
 
@@ -346,17 +348,46 @@ export async function parseAndExecuteCode({
 
 // Helper functions
 
-function _getVariableValue(interpreter: any, name: string): any {
+function _getVariableValue(
+  interpreter: any,
+  targetVar: string,
+  nonTargetVars: string[]
+): ExecutionStep {
+  const ans: ExecutionStep = {
+    targetVars: {},
+    nonTargetVars: {},
+  }
+
   let scope = interpreter.getScope()
   while (scope) {
-    const obj = scope.object
-    const props = obj?.properties
-    if (props && Object.prototype.hasOwnProperty.call(props, name)) {
-      return interpreter.pseudoToNative(props[name])
+    const props = scope.object?.properties
+    if (props) {
+      // Add targetVar if found
+      if (
+        targetVar &&
+        !(targetVar in ans.targetVars) &&
+        Object.prototype.hasOwnProperty.call(props, targetVar)
+      ) {
+        ans.targetVars[targetVar] = interpreter.pseudoToNative(props[targetVar])
+      }
+
+      // Add nonTargetVars if found
+      for (const varName of nonTargetVars) {
+        if (
+          !(varName in ans.nonTargetVars) &&
+          Object.prototype.hasOwnProperty.call(props, varName)
+        ) {
+          ans.nonTargetVars[varName] = interpreter.pseudoToNative(
+            props[varName]
+          )
+        }
+      }
     }
+
     scope = scope.parentScope
   }
-  return undefined
+
+  return ans
 }
 
 function _deepEqual(a: any, b: any): boolean {

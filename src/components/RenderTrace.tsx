@@ -17,9 +17,12 @@ export const RenderTrace = ({
     width: 800,
     height: 600,
   })
-
+  console.log("Debug")
+  console.log(algorithmState?.executionSteps?.[algorithmState.currentStep])
   const variableValue =
-    algorithmState?.executionSteps?.[algorithmState.currentStep]
+    algorithmState?.executionSteps?.[algorithmState.currentStep]?.targetVars?.[
+      selectedVariable
+    ]
 
   const startX = containerSize.width / 2
   const startY = 60
