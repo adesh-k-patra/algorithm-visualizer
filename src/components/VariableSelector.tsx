@@ -23,6 +23,8 @@ import type { NodePath } from "@babel/traverse"
 
 interface VariableSelectorProps {
   code: string
+  variables: string[]
+  onVariablesSet: (variables: string[]) => void
   selectedVariable: string
   selectedDataStructure: string
   onVariableChange: (variable: string) => void
@@ -31,12 +33,13 @@ interface VariableSelectorProps {
 
 export function VariableSelector({
   code,
+  variables,
+  onVariablesSet,
   selectedVariable,
   selectedDataStructure,
   onVariableChange,
   onDataStructureChange,
 }: VariableSelectorProps) {
-  const [variables, setVariables] = useState<string[]>([])
   const [showVariableDropdown, setShowVariableDropdown] = useState(false)
   const [showDataStructureDropdown, setShowDataStructureDropdown] =
     useState(false)
@@ -106,13 +109,13 @@ export function VariableSelector({
           )
         },
       })
-      setVariables(variables)
+      onVariablesSet(variables)
     } catch (err) {
       console.log(err)
-      setVariables([])
+      onVariablesSet([])
     }
   }, [code])
-
+  console.log(variables)
   return (
     <div className="h-16 bg-gray-800 border-b border-gray-700 flex items-center px-4 gap-6">
       <div className="flex items-center gap-2">

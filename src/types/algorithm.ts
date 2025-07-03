@@ -1,8 +1,3 @@
-export interface TraceEntry {
-  value: any[]
-  lineNumber: number
-}
-
 export interface TreeNode {
   name: string
   value: any
@@ -25,13 +20,10 @@ export interface DataStructure {
   }
 }
 
-// export interface ExecutionStep {
-//   stepNumber: number
-//   description: string
-//   highlightedNodes?: string[]
-//   currentValue?: any
-//   action?: string
-// }
+export interface ExecutionStep {
+  targetVars: any
+  nonTargetVars: any
+}
 
 export interface AlgorithmState {
   isRunning: boolean
@@ -41,7 +33,7 @@ export interface AlgorithmState {
   logs: LogEntry[]
   highlightedNodes: []
   dataStructure: DataStructure | null
-  executionSteps?: any[]
+  executionSteps?: ExecutionStep[]
   executionSpeed: number
 }
 

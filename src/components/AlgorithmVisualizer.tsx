@@ -7,6 +7,7 @@ import { ConsoleOutput } from "./ConsoleOutput"
 import { VariableSelector } from "./VariableSelector"
 import { AlgorithmState } from "../types/algorithm"
 import { RenderTrace } from "./RenderTrace"
+import { NonTargetOutput } from "./NonTargetOutput"
 
 const initialCode = `var person = {
   name: "Alice",
@@ -40,6 +41,7 @@ person.hobbies = ["reading", "traveling"];
 
 export function AlgorithmVisualizer() {
   const [code, setCode] = useState(initialCode)
+  const [variables, setVariables] = useState<string[]>([])
   const [selectedVariable, setSelectedVariable] = useState("")
   const [selectedDataStructure, setSelectedDataStructure] = useState("")
   const [algorithmState, setAlgorithmState] = useState<AlgorithmState>({
@@ -88,11 +90,14 @@ export function AlgorithmVisualizer() {
           algorithmState={algorithmState}
           onStateChange={setAlgorithmState}
           code={code}
+          variables={variables}
           selectedVariable={selectedVariable}
           selectedDataStructure={selectedDataStructure}
         />
         <VariableSelector
           code={code}
+          variables={variables}
+          onVariablesSet={setVariables}
           selectedVariable={selectedVariable}
           selectedDataStructure={selectedDataStructure}
           onVariableChange={setSelectedVariable}
@@ -115,7 +120,9 @@ export function AlgorithmVisualizer() {
                       selectedVariable={selectedVariable}
                     />
                   </div>
-                  <div className="w-[200px] bg-orange-500">hello</div>
+                  <div className="w-[250px] bg-orange-500">
+                    <NonTargetOutput algorithmState={algorithmState} />
+                  </div>
                 </div>
               </Panel>
               <PanelResizeHandle
